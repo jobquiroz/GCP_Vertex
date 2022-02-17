@@ -1,0 +1,25 @@
+studySpec:
+  metrics:
+  # Correspond to the metrics we use the hypertune library to report.
+  - metricId: val_accuracy
+    goal: MAXIMIZE
+  parameters:
+  # Correspond to the command line argument our Python code expects.
+  - parameterId: dropout_rate
+    doubleValueSpec:
+      minValue: 0.01
+      maxValue: 0.9
+trialJobSpec:
+  workerPoolSpecs:
+  - machineSpec:
+      # Machines and GPUs: https://cloud.google.com/vertex-ai/docs/training/configure-compute#specifying_gpus
+      machineType: n1-standard-4
+      acceleratorType: NVIDIA_TESLA_V100
+      acceleratorCount: 2
+    replicaCount: 1
+    pythonPackageSpec:
+      # Executors: https://cloud.google.com/vertex-ai/docs/training/pre-built-containers
+      executorImageUri: us-docker.pkg.dev/vertex-ai/training/tf-gpu.2-3:latest
+      packageUris: gs://ma-mx-presales-lab-bucket/vertex-end-to-end/python_code2/trainer-0.1.tar.gz
+      pythonModule: trainer.task
+      args: --epochs=50
