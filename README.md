@@ -1,0 +1,1 @@
+- [Vertex-end-to-end](https://github.com/jobquiroz/GCP_Vertex/tree/main/Vertex-end-to-end) follows this tutorial series: [(Medium) A Step-by-Step Guide to Training a Model on Google Cloud’s Vertex AI](https://betterprogramming.pub/a-step-by-step-guide-to-train-a-model-on-google-clouds-vertex-ai-47faafae1330)
