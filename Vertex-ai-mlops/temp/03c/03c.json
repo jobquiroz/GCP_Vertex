@@ -1,0 +1,801 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-bqml-dnn": {
+        "executorLabel": "exec-bqml-dnn",
+        "inputDefinitions": {
+          "parameters": {
+            "dataname": {
+              "type": "STRING"
+            },
+            "model": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "var_omit": {
+              "type": "STRING"
+            },
+            "var_target": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "bqml_model": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "query": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-bqml-eval": {
+        "executorLabel": "exec-bqml-eval",
+        "inputDefinitions": {
+          "parameters": {
+            "dataname": {
+              "type": "STRING"
+            },
+            "model": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "var_target": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "metrics": {
+              "artifactType": {
+                "schemaTitle": "system.Metrics",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "metricsc": {
+              "artifactType": {
+                "schemaTitle": "system.ClassificationMetrics",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "metric": {
+              "type": "DOUBLE"
+            }
+          }
+        }
+      },
+      "comp-bqml-eval-2": {
+        "executorLabel": "exec-bqml-eval-2",
+        "inputDefinitions": {
+          "parameters": {
+            "dataname": {
+              "type": "STRING"
+            },
+            "model": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "var_target": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "metrics": {
+              "artifactType": {
+                "schemaTitle": "system.Metrics",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "metricsc": {
+              "artifactType": {
+                "schemaTitle": "system.ClassificationMetrics",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "metric": {
+              "type": "DOUBLE"
+            }
+          }
+        }
+      },
+      "comp-bqml-export": {
+        "executorLabel": "exec-bqml-export",
+        "inputDefinitions": {
+          "artifacts": {
+            "bqml_model": {
+              "artifactType": {
+                "schemaTitle": "system.Model",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "export_location": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "tf_model": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-condition-replace-model-1": {
+        "dag": {
+          "tasks": {
+            "bqml-export": {
+              "cachingOptions": {
+                "enableCache": true
+              },
+              "componentRef": {
+                "name": "comp-bqml-export"
+              },
+              "inputs": {
+                "artifacts": {
+                  "bqml_model": {
+                    "componentInputArtifact": "pipelineparam--bqml-dnn-bqml_model"
+                  }
+                },
+                "parameters": {
+                  "export_location": {
+                    "componentInputParameter": "pipelineparam--uri"
+                  },
+                  "project": {
+                    "componentInputParameter": "pipelineparam--project"
+                  }
+                }
+              },
+              "taskInfo": {
+                "name": "bqml-export"
+              }
+            },
+            "endpoint-update": {
+              "cachingOptions": {
+                "enableCache": true
+              },
+              "componentRef": {
+                "name": "comp-endpoint-update"
+              },
+              "dependentTasks": [
+                "bqml-export"
+              ],
+              "inputs": {
+                "artifacts": {
+                  "newmodel": {
+                    "taskOutputArtifact": {
+                      "outputArtifactKey": "tf_model",
+                      "producerTask": "bqml-export"
+                    }
+                  }
+                },
+                "parameters": {
+                  "deploy_container": {
+                    "componentInputParameter": "pipelineparam--deploy_container"
+                  },
+                  "deploy_machine": {
+                    "componentInputParameter": "pipelineparam--deploy_machine"
+                  },
+                  "display_name": {
+                    "componentInputParameter": "pipelineparam--display_name"
+                  },
+                  "endpoint_prefix": {
+                    "componentInputParameter": "pipelineparam--endpoint_prefix"
+                  },
+                  "label": {
+                    "componentInputParameter": "pipelineparam--label"
+                  },
+                  "project": {
+                    "componentInputParameter": "pipelineparam--project"
+                  },
+                  "region": {
+                    "componentInputParameter": "pipelineparam--region"
+                  }
+                }
+              },
+              "taskInfo": {
+                "name": "endpoint-update"
+              }
+            }
+          }
+        },
+        "inputDefinitions": {
+          "artifacts": {
+            "pipelineparam--bqml-dnn-bqml_model": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "pipelineparam--deploy_container": {
+              "type": "STRING"
+            },
+            "pipelineparam--deploy_machine": {
+              "type": "STRING"
+            },
+            "pipelineparam--display_name": {
+              "type": "STRING"
+            },
+            "pipelineparam--endpoint_prefix": {
+              "type": "STRING"
+            },
+            "pipelineparam--label": {
+              "type": "STRING"
+            },
+            "pipelineparam--model-compare-Output": {
+              "type": "STRING"
+            },
+            "pipelineparam--project": {
+              "type": "STRING"
+            },
+            "pipelineparam--region": {
+              "type": "STRING"
+            },
+            "pipelineparam--uri": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-endpoint-update": {
+        "executorLabel": "exec-endpoint-update",
+        "inputDefinitions": {
+          "artifacts": {
+            "newmodel": {
+              "artifactType": {
+                "schemaTitle": "system.Model",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "deploy_container": {
+              "type": "STRING"
+            },
+            "deploy_machine": {
+              "type": "STRING"
+            },
+            "display_name": {
+              "type": "STRING"
+            },
+            "endpoint_prefix": {
+              "type": "STRING"
+            },
+            "label": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-model-compare": {
+        "executorLabel": "exec-model-compare",
+        "inputDefinitions": {
+          "parameters": {
+            "base_metric": {
+              "type": "DOUBLE"
+            },
+            "challenger_metric": {
+              "type": "DOUBLE"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-bqml-dnn": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "bqml_dnn"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'google-cloud-bigquery' 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef bqml_dnn(\n    project: str,\n    var_target: str,\n    var_omit: str,\n    model: str,\n    dataname: str,\n    bqml_model: dsl.Output[dsl.Artifact]\n) -> NamedTuple(\"bqml_training\", [(\"query\", str)]):\n\n    from collections import namedtuple\n    from google.cloud import bigquery\n    bigquery = bigquery.Client(project = project)\n\n    query = f\"\"\"\n    CREATE OR REPLACE MODEL `{project}.{dataname}.{model}`\n    OPTIONS\n        (model_type = 'DNN_CLASSIFIER',\n            auto_class_weights = FALSE,\n            input_label_cols = ['{var_target}'],\n            data_split_col = 'custom_splits',\n            data_split_method = 'CUSTOM',\n            EARLY_STOP = FALSE,\n            OPTIMIZER = 'SGD',\n            HIDDEN_UNITS = [2],\n            LEARN_RATE = 0.001,\n            BATCH_SIZE = 100,\n            DROPOUT = 0.25,\n            ACTIVATION_FN = 'SIGMOID',\n            MAX_ITERATIONS = 10\n        ) AS\n    SELECT * EXCEPT({','.join(var_omit.split())}, splits),\n        CASE\n            WHEN splits = 'TRAIN' THEN FALSE\n            ELSE TRUE\n        END AS custom_splits\n    FROM `{project}.{dataname}.{dataname}_prepped`\n    WHERE splits != 'TEST'\n    \"\"\"\n    job = bigquery.query(query = query)\n    job.result()\n    bqml_model.uri = f\"bq://{project}.{dataname}.{model}\"\n\n    result = namedtuple(\"bqml_training\", [\"query\"])\n\n    return result(query = str(query))\n\n"
+            ],
+            "image": "python:3.9"
+          }
+        },
+        "exec-bqml-eval": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "bqml_eval"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'pandas' 'pyarrow' 'sklearn' 'google-cloud-bigquery' 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef bqml_eval(\n    project: str,\n    var_target: str,\n    model: str,\n    dataname: str,\n    metrics: dsl.Output[dsl.Metrics],\n    metricsc: dsl.Output[dsl.ClassificationMetrics]\n) -> NamedTuple(\"model_eval\", [(\"metric\", float)]):\n\n    from collections import namedtuple\n    from sklearn.metrics import average_precision_score, confusion_matrix\n    from google.cloud import bigquery\n    bigquery = bigquery.Client(project = project)\n\n    query = f\"\"\"\n    SELECT {var_target}, predicted_{var_target}, prob, splits \n    FROM ML.PREDICT (MODEL `{project}.{dataname}.{model}`,(\n        SELECT *\n        FROM `{project}.{dataname}.{dataname}_prepped`\n        WHERE splits = 'TEST')\n      ), UNNEST(predicted_{var_target}_probs)\n    WHERE label=1\n    \"\"\"\n    pred = bigquery.query(query = query).to_dataframe()\n\n    auPRC = average_precision_score(pred[var_target], pred['prob'], average='micro')    \n    metrics.log_metric('auPRC', auPRC)\n    metricsc.log_confusion_matrix(['Not Fraud', 'Fraud'], confusion_matrix(pred[var_target], pred[f'predicted_{var_target}']).tolist())\n\n    model_eval = namedtuple(\"model_eval\", [\"metric\"])\n    return model_eval(metric = float(auPRC))\n\n"
+            ],
+            "image": "python:3.9"
+          }
+        },
+        "exec-bqml-eval-2": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "bqml_eval"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'pandas' 'pyarrow' 'sklearn' 'google-cloud-bigquery' 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef bqml_eval(\n    project: str,\n    var_target: str,\n    model: str,\n    dataname: str,\n    metrics: dsl.Output[dsl.Metrics],\n    metricsc: dsl.Output[dsl.ClassificationMetrics]\n) -> NamedTuple(\"model_eval\", [(\"metric\", float)]):\n\n    from collections import namedtuple\n    from sklearn.metrics import average_precision_score, confusion_matrix\n    from google.cloud import bigquery\n    bigquery = bigquery.Client(project = project)\n\n    query = f\"\"\"\n    SELECT {var_target}, predicted_{var_target}, prob, splits \n    FROM ML.PREDICT (MODEL `{project}.{dataname}.{model}`,(\n        SELECT *\n        FROM `{project}.{dataname}.{dataname}_prepped`\n        WHERE splits = 'TEST')\n      ), UNNEST(predicted_{var_target}_probs)\n    WHERE label=1\n    \"\"\"\n    pred = bigquery.query(query = query).to_dataframe()\n\n    auPRC = average_precision_score(pred[var_target], pred['prob'], average='micro')    \n    metrics.log_metric('auPRC', auPRC)\n    metricsc.log_confusion_matrix(['Not Fraud', 'Fraud'], confusion_matrix(pred[var_target], pred[f'predicted_{var_target}']).tolist())\n\n    model_eval = namedtuple(\"model_eval\", [\"metric\"])\n    return model_eval(metric = float(auPRC))\n\n"
+            ],
+            "image": "python:3.9"
+          }
+        },
+        "exec-bqml-export": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "bqml_export"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'google-cloud-bigquery' 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef bqml_export(\n    project: str,\n    export_location: str,\n    bqml_model: dsl.Input[dsl.Model],\n    tf_model: dsl.Output[dsl.Artifact],  \n):\n\n    from google.cloud import bigquery\n    bigquery = bigquery.Client(project = project)\n\n    bqml_model_name = bqml_model.uri.split(\"/\")[-1]\n    export = bigquery.query(query = f\"EXPORT MODEL `{bqml_model_name}` OPTIONS(URI = '{export_location}')\")\n    export.result()\n\n    tf_model.uri = export_location\n\n"
+            ],
+            "image": "python:3.9"
+          }
+        },
+        "exec-endpoint-update": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "endpoint_update"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'google-cloud-aiplatform' 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef endpoint_update(\n    project: str,\n    region: str,\n    endpoint_prefix: str,\n    newmodel: dsl.Input[dsl.Model],\n    display_name: str,\n    deploy_machine: str,\n    deploy_container: str,\n    label: str\n):\n\n    from google.cloud import aiplatform\n    aiplatform.init(project = project, location = region)\n\n    # upload new model (03c)\n    model = aiplatform.Model.upload(\n        display_name = display_name,\n        serving_container_image_uri = deploy_container,\n        artifact_uri = newmodel.uri,\n        labels = {'notebook':f'{label}'}\n    )\n\n    # find endpoint from notebook 03b\n    for e in aiplatform.Endpoint.list():\n        if e.display_name.startswith(endpoint_prefix): endpoint = e\n    print(endpoint.display_name)\n\n    # list model(s) on 03b endpoint\n    models = endpoint.list_models()\n    if len(models) == 1:\n        oldmodel = models[0]\n    print(oldmodel)\n\n    # deploy 03c model to endpoint with traffic_split = 100\n    endpoint.deploy(\n        model = model,\n        deployed_model_display_name = display_name,\n        traffic_percentage = 100,\n        machine_type = deploy_machine,\n        min_replica_count = 1,\n        max_replica_count = 1\n    )\n\n    # undeploy 03b model\n    endpoint.undeploy(\n        deployed_model_id = oldmodel.id\n    )\n\n"
+            ],
+            "image": "python:3.9"
+          }
+        },
+        "exec-model-compare": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "model_compare"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef model_compare(\n    base_metric: float,\n    challenger_metric: float,\n) -> bool: \n\n    if base_metric < challenger_metric:\n        replace = True\n    else:\n        replace = False\n\n    return replace\n\n"
+            ],
+            "image": "python:3.7"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "kfp-03c-fraud-20220330182342"
+    },
+    "root": {
+      "dag": {
+        "outputs": {
+          "artifacts": {
+            "bqml-eval-2-metrics": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "metrics",
+                  "producerSubtask": "bqml-eval-2"
+                }
+              ]
+            },
+            "bqml-eval-2-metricsc": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "metricsc",
+                  "producerSubtask": "bqml-eval-2"
+                }
+              ]
+            },
+            "bqml-eval-metrics": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "metrics",
+                  "producerSubtask": "bqml-eval"
+                }
+              ]
+            },
+            "bqml-eval-metricsc": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "metricsc",
+                  "producerSubtask": "bqml-eval"
+                }
+              ]
+            }
+          }
+        },
+        "tasks": {
+          "bqml-dnn": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-bqml-dnn"
+            },
+            "inputs": {
+              "parameters": {
+                "dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "model": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{{$.inputs.parameters['pipelineparam--dataname']}}_dnn"
+                    }
+                  }
+                },
+                "pipelineparam--dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "var_omit": {
+                  "componentInputParameter": "var_omit"
+                },
+                "var_target": {
+                  "componentInputParameter": "var_target"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "bqml-dnn"
+            }
+          },
+          "bqml-eval": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-bqml-eval"
+            },
+            "inputs": {
+              "parameters": {
+                "dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "model": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{{$.inputs.parameters['pipelineparam--dataname']}}_lr"
+                    }
+                  }
+                },
+                "pipelineparam--dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "var_target": {
+                  "componentInputParameter": "var_target"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "bqml-eval"
+            }
+          },
+          "bqml-eval-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-bqml-eval-2"
+            },
+            "dependentTasks": [
+              "bqml-dnn"
+            ],
+            "inputs": {
+              "parameters": {
+                "dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "model": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "{{$.inputs.parameters['pipelineparam--dataname']}}_dnn"
+                    }
+                  }
+                },
+                "pipelineparam--dataname": {
+                  "componentInputParameter": "dataname"
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "var_target": {
+                  "componentInputParameter": "var_target"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "bqml-eval-2"
+            }
+          },
+          "condition-replace-model-1": {
+            "componentRef": {
+              "name": "comp-condition-replace-model-1"
+            },
+            "dependentTasks": [
+              "bqml-dnn",
+              "model-compare"
+            ],
+            "inputs": {
+              "artifacts": {
+                "pipelineparam--bqml-dnn-bqml_model": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "bqml_model",
+                    "producerTask": "bqml-dnn"
+                  }
+                }
+              },
+              "parameters": {
+                "pipelineparam--deploy_container": {
+                  "componentInputParameter": "deploy_container"
+                },
+                "pipelineparam--deploy_machine": {
+                  "componentInputParameter": "deploy_machine"
+                },
+                "pipelineparam--display_name": {
+                  "componentInputParameter": "display_name"
+                },
+                "pipelineparam--endpoint_prefix": {
+                  "componentInputParameter": "endpoint_prefix"
+                },
+                "pipelineparam--label": {
+                  "componentInputParameter": "label"
+                },
+                "pipelineparam--model-compare-Output": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "model-compare"
+                  }
+                },
+                "pipelineparam--project": {
+                  "componentInputParameter": "project"
+                },
+                "pipelineparam--region": {
+                  "componentInputParameter": "region"
+                },
+                "pipelineparam--uri": {
+                  "componentInputParameter": "uri"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "condition-replace-model-1"
+            },
+            "triggerPolicy": {
+              "condition": "inputs.parameters['pipelineparam--model-compare-Output'].string_value == 'false'"
+            }
+          },
+          "model-compare": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-compare"
+            },
+            "dependentTasks": [
+              "bqml-eval",
+              "bqml-eval-2"
+            ],
+            "inputs": {
+              "parameters": {
+                "base_metric": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "metric",
+                    "producerTask": "bqml-eval"
+                  }
+                },
+                "challenger_metric": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "metric",
+                    "producerTask": "bqml-eval-2"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-compare"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "bq_source": {
+            "type": "STRING"
+          },
+          "dataname": {
+            "type": "STRING"
+          },
+          "deploy_container": {
+            "type": "STRING"
+          },
+          "deploy_machine": {
+            "type": "STRING"
+          },
+          "display_name": {
+            "type": "STRING"
+          },
+          "endpoint_prefix": {
+            "type": "STRING"
+          },
+          "label": {
+            "type": "STRING"
+          },
+          "project": {
+            "type": "STRING"
+          },
+          "region": {
+            "type": "STRING"
+          },
+          "uri": {
+            "type": "STRING"
+          },
+          "var_omit": {
+            "type": "STRING"
+          },
+          "var_target": {
+            "type": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "bqml-eval-2-metrics": {
+            "artifactType": {
+              "schemaTitle": "system.Metrics",
+              "schemaVersion": "0.0.1"
+            }
+          },
+          "bqml-eval-2-metricsc": {
+            "artifactType": {
+              "schemaTitle": "system.ClassificationMetrics",
+              "schemaVersion": "0.0.1"
+            }
+          },
+          "bqml-eval-metrics": {
+            "artifactType": {
+              "schemaTitle": "system.Metrics",
+              "schemaVersion": "0.0.1"
+            }
+          },
+          "bqml-eval-metricsc": {
+            "artifactType": {
+              "schemaTitle": "system.ClassificationMetrics",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.11"
+  },
+  "runtimeConfig": {
+    "gcsOutputDirectory": "gs://vertex-ai-mlops-bucket/fraud/models/03c/20220330182342/kfp/",
+    "parameters": {
+      "bq_source": {
+        "stringValue": "bq://ma-mx-presales-lab.fraud.fraud_prepped"
+      },
+      "dataname": {
+        "stringValue": "fraud"
+      },
+      "deploy_container": {
+        "stringValue": "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-3:latest"
+      },
+      "deploy_machine": {
+        "stringValue": "n1-standard-4"
+      },
+      "display_name": {
+        "stringValue": "03c_fraud_20220330182342"
+      },
+      "label": {
+        "stringValue": "03c"
+      },
+      "project": {
+        "stringValue": "ma-mx-presales-lab"
+      },
+      "region": {
+        "stringValue": "us-central1"
+      },
+      "uri": {
+        "stringValue": "gs://vertex-ai-mlops-bucket/fraud/models/03c"
+      },
+      "var_omit": {
+        "stringValue": "transaction_id"
+      },
+      "var_target": {
+        "stringValue": "Class"
+      }
+    }
+  }
+}
